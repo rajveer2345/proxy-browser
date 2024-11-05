@@ -14,12 +14,23 @@ app.get('/', (req, res) => {
 
 // Route to fetch and display a webpage
 app.get('/browse', (req, res) => {
-    const targetUrl = req.query.url;
+    let targetUrl = req.query.url;
 
     if (!targetUrl) {
         return res.status(400).send('URL is required');
     }
 
+    const isValidUrl = /^(https?:\/\/|www\.)[^\s/$.?#].[^\s]*$/i.test(targetUrl);
+
+    // If the input is not a valid URL, convert it to a Google search URL
+    if (!isValidUrl) {
+        targetUrl = `https://www.google.com/search?q=${encodeURIComponent(targetUrl)}`;
+    } else {
+        // Ensure targetUrl starts with http:// or https://
+        if (!/^https?:\/\//i.test(targetUrl)) {
+            targetUrl = `https://${targetUrl}`;
+        }
+    }
     // Fetch the requested URL's content
     request(targetUrl, { followRedirect: true }, (error, response, body) => {
         if (error) {
