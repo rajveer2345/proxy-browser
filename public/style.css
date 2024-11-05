@@ -1,0 +1,30 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+form {
+    margin: 20px;
+}
+
+input[type="text"] {
+    width: 60%;
+    padding: 8px;
+    font-size: 1rem;
+}
+
+button {
+    padding: 8px 16px;
+    font-size: 1rem;
+}
+
+.browser-content {
+    padding: 20px;
+    border: 1px solid #ddd;
+    margin: 20px auto;
+    width: 80%;
+    height: 80vh;
+    overflow: auto;
+}
