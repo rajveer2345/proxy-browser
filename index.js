@@ -38,8 +38,9 @@ app.get('/browse', (req, res) => {
         }
 
         // Rewrite asset URLs to go through our proxy
-        const rewrittenContent = rewriteAssetUrls(body, targetUrl);
-        res.render('browser', { content: rewrittenContent, url: targetUrl });
+      
+        //const rewrittenContent = rewriteAssetUrls(body, targetUrl);
+        res.render('browser', { content: body});
     });
 });
 
@@ -50,19 +51,15 @@ app.get('/asset', (req, res) => {
         return res.status(400).send('Asset URL is required');
     }
 
-    request(assetUrl)
+    // Decode the URL to handle any encoded characters
+    const decodedUrl = decodeURIComponent(assetUrl);
+
+    request(decodedUrl)
         .on('error', () => res.status(500).send('Error fetching the asset'))
         .pipe(res);
 });
 
-// Function to rewrite asset URLs in HTML content
-function rewriteAssetUrls(html, baseUrl) {
-    return html.replace(/(href|src)="([^"]+)"/g, (match, attr, assetPath) => {
-        const assetUrl = urlModule.resolve(baseUrl, assetPath);
-        const proxiedUrl = `/asset?url=${encodeURIComponent(assetUrl)}`;
-        return `${attr}="${proxiedUrl}"`;
-    });
-}
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

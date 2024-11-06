@@ -1,14 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browsing: <%= url %></title>
-</head>
-<body>
-    <div id="proxy-browser">
-        <!-- Render the HTML content from the requested URL -->
-        <%- content %>
-    </div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Browser</title>
+  </head>
+  <body>
+    <!-- Container for dynamically loaded HTML content -->
+    <div id="content"><%- content %></div>
+
+    <script>
+      // Function to intercept all link clicks
+      function setupLinkInterception() {
+        document.querySelectorAll("#content a").forEach((link) => {
+          link.addEventListener("click", async (event) => {
+            event.preventDefault(); // Prevent default link behavior
+
+            let newUrl = event.currentTarget.href;
+            const url = new URL(newUrl);
+
+            if (url.searchParams.has("q")) {            
+              const innerUrl = new URL(url.searchParams.get("q"));
+              newUrl = innerUrl;
+            }
+
+            // Extract the link's URL
+            try {
+              // Make a fetch request to load new content through /browse route
+              const response = await fetch(
+                `/browse?url=${encodeURIComponent(newUrl)}`
+              );
+              const newContent = await response.text();
+
+              // Replace the content div with new content
+              document.getElementById("content").innerHTML = newContent;
+
+              // Update browser's URL without reloading
+              history.pushState(
+                null,
+                "",
+                `/browse?url=${encodeURIComponent(newUrl)}`
+              );
+
+              // Set up interception again for new links in the new content
+              setupLinkInterception();
+            } catch (error) {
+              console.error("Failed to load new content:", error);
+            }
+          });
+        });
+      }
+
+      // Initial setup for link interception on page load
+      setupLinkInterception();
+    </script>
+  </body>
 </html>
